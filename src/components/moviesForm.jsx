@@ -3,10 +3,18 @@ import { saveMovie, getMovie } from "../services/movieService";
 import Form from "./common/form";
 import Joi from "joi-browser";
 import { getGenres } from "../services/genreService";
+import axios from "axios";
+axios.create({
+  baseURL: process.env.REACT_APP_API_URL,
+  headers: {
+    "Content-type": "application/json",
+  },
+});
 class MoviesForm extends Form {
   state = {
     data: { title: "", numberInStock: "", dailyRentalRate: "" },
     genreId: "",
+    video: {},
     errors: {},
     genres: [],
   };
@@ -36,13 +44,21 @@ class MoviesForm extends Form {
     }
   }
 
-  doSubmit = () => {
+  doSubmit = async () => {
     const { data, genreId } = this.state;
     const movie = { ...data };
     movie.genreId = genreId;
     const { _id } = this.props.match.params;
     if (_id !== "new") movie._id = _id;
     this.props.history.push("/movies");
+    let formData = new FormData();
+    formData.append("file", this.state.video);
+    const res = await axios.post("/video", formData, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    });
+    movie.filename = res.data.file.filename;
     saveMovie(movie);
   };
   schema = {
@@ -56,6 +72,10 @@ class MoviesForm extends Form {
   };
   handleSelectChange = ({ currentTarget: input }) => {
     this.setState({ genreId: input.value });
+  };
+  handleFileChange = (event) => {
+    if (event && event.target && event.target.files)
+      this.setState({ video: event.target.files[0] });
   };
   render() {
     return (
@@ -71,7 +91,7 @@ class MoviesForm extends Form {
           )}
           {this.renderInput("numberInStock", "Number in Stock")}
           {this.renderInput("dailyRentalRate", "Rate")}
-
+          <input type="file" onChange={this.handleFileChange} />
           {this.renderButton("Save")}
         </form>
       </div>

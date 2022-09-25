@@ -63,7 +63,7 @@ class Movie extends Component {
     this.setState({ sortColumn });
   };
   handleNewMovie = () => {
-    this.props.history.push("/video");
+    this.props.history.push("/movies/new");
   };
   handleSearch = (searchItem) => {
     this.setState({

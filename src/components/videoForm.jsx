@@ -1,7 +1,11 @@
 import React, { Component } from "react";
-import httpServices from "../services/httpServices";
-import { saveVideo } from "../services/movieService";
-const url1 = "/video";
+import axios from "axios";
+axios.create({
+  baseURL: process.env.REACT_APP_API_URL,
+  headers: {
+    "Content-type": "application/json",
+  },
+});
 class VideoForm extends Component {
   state = {
     video: {},
@@ -9,13 +13,12 @@ class VideoForm extends Component {
   handleSubmit = async (event) => {
     event.preventDefault();
     let formData = new FormData();
-    formData.append("customFile", this.state.video);
-    const res = await httpServices.post(url1, formData, {
+    formData.append("file", this.state.video);
+    axios.post("/video", formData, {
       headers: {
-        "Content-type": "multipart/form-data",
+        "Content-Type": "multipart/form-data",
       },
     });
-    console.log(res);
     this.props.history.push("/");
   };
   handleChange = (event) => {
